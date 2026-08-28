@@ -1,0 +1,85 @@
+{
+  "protocol_version": "0.1",
+  "skill": {
+    "id": "hermes-skill-github-issues",
+    "display_name": "GitHub Issues",
+    "description": "Create, triage, label, and assign GitHub issues through guarded gh or REST workflows."
+  },
+  "task_profile": {
+    "category": "integration",
+    "architecture": "pipeline",
+    "artifact": "table",
+    "inputs": [
+      "Issue request",
+      "Repository and labels"
+    ],
+    "outputs": [
+      "Created issue verification",
+      "#142",
+      "bug + priority",
+      "Assignee",
+      "Open"
+    ]
+  },
+  "modules": {
+    "memory": {
+      "strategy": "stage_artifact_log",
+      "responsibility": "Retain issue request plus decisions, observations, and verification evidence needed to resume safely."
+    },
+    "planning": {
+      "strategy": "linear_gated_plan",
+      "responsibility": "Transform repository and labels into the ordered, bounded stages defined by this skill."
+    },
+    "action": {
+      "strategy": "inspect_preview_authorize_execute_reread",
+      "responsibility": "Advance the workflow through issue draft while preserving stop conditions and user authority."
+    },
+    "capability": {
+      "strategy": "task_conditioned_minimum_capability_set",
+      "responsibility": "Expose the minimum service operations required for the requested target; writes require an explicit preview gate."
+    }
+  },
+  "execution": {
+    "stages": [
+      "Resolve repository owner and target",
+      "Draft title body labels and assignee",
+      "Preview the exact issue payload",
+      "Create only after authorization",
+      "Fetch the issue by returned number",
+      "Report canonical URL and final fields"
+    ],
+    "gates": [
+      "scope_and_authority_confirmed",
+      "capability_and_dependency_preflight",
+      "consequential_action_previewed_when_applicable",
+      "output_reopened_and_verified"
+    ]
+  },
+  "verification": {
+    "evidence": [
+      "#142",
+      "bug + priority",
+      "Assignee",
+      "Open"
+    ],
+    "metrics": [
+      "task_success",
+      "verification_pass_rate",
+      "tool_error_rate",
+      "repair_count",
+      "latency_ms",
+      "estimated_cost_usd"
+    ]
+  },
+  "failure_policy": {
+    "max_repairs": 2,
+    "schema_error": "repair_then_stop",
+    "permission_error": "stop_without_retry",
+    "verification_failure": "report_incomplete"
+  },
+  "maturity": {
+    "level": "executable_contract",
+    "runtime_scope": "validation_and_dry_run_planning",
+    "claim_boundary": "This repository validates and plans the harness contract; it does not claim live service execution or benchmark gains without a connected adapter and measured evidence."
+  }
+}
